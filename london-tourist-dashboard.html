@@ -1,0 +1,591 @@
+<title>London Tourist Sites Dashboard</title>
+<style>
+  .viz-root {
+    --surface-1:      #fcfcfb;
+    --page-plane:     #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --chip-hover:     rgba(11,11,11,0.05);
+
+    --series-1: #2a78d6; /* Museums & Galleries */
+    --series-2: #1baf7a; /* Historic Sites & Palaces */
+    --series-3: #eda100; /* Landmarks & Attractions */
+    --series-4: #008300; /* Parks & Gardens */
+    --series-5: #4a3aa7; /* Markets & Neighbourhoods */
+
+    color: var(--text-primary);
+    background: var(--page-plane);
+  }
+  :root[data-theme="dark"] .viz-root,
+  @media (prefers-color-scheme: dark) {
+    .viz-root {
+      --surface-1:      #1a1a19;
+      --page-plane:     #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --chip-hover:     rgba(255,255,255,0.08);
+
+      --series-1: #3987e5;
+      --series-2: #199e70;
+      --series-3: #c98500;
+      --series-4: #008300;
+      --series-5: #9085e9;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    --surface-1:      #1a1a19;
+    --page-plane:     #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --chip-hover:     rgba(255,255,255,0.08);
+
+    --series-1: #3987e5;
+    --series-2: #199e70;
+    --series-3: #c98500;
+    --series-4: #008300;
+    --series-5: #9085e9;
+  }
+  :root[data-theme="light"] .viz-root {
+    --surface-1:      #fcfcfb;
+    --page-plane:     #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --chip-hover:     rgba(11,11,11,0.05);
+
+    --series-1: #2a78d6;
+    --series-2: #1baf7a;
+    --series-3: #eda100;
+    --series-4: #008300;
+    --series-5: #4a3aa7;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .viz-root {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 32px 24px 64px;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+
+  header.page-head { margin-bottom: 28px; }
+  header.page-head h1 { font-size: 26px; font-weight: 650; margin: 0 0 6px; }
+  header.page-head p { font-size: 14px; color: var(--text-secondary); margin: 0; max-width: 640px; line-height: 1.5; }
+
+  /* Stat tiles */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-tile {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .stat-tile .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .stat-tile .value { font-size: 26px; font-weight: 650; letter-spacing: -0.01em; }
+
+  /* Filter row */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .chip {
+    font-size: 13px;
+    font-weight: 550;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+  }
+  .chip:hover { background: var(--chip-hover); }
+  .chip .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .chip[aria-pressed="true"] {
+    background: var(--text-primary);
+    color: var(--surface-1);
+    border-color: var(--text-primary);
+  }
+  .chip[aria-pressed="true"] .dot { outline: 2px solid var(--surface-1); outline-offset: -1px; }
+
+  .view-toggle {
+    margin-left: auto;
+    font-size: 13px;
+    font-weight: 550;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+  .view-toggle:hover { background: var(--chip-hover); }
+
+  /* Chart card */
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px 18px;
+    margin-bottom: 24px;
+  }
+  .card h2 { font-size: 15px; font-weight: 650; margin: 0 0 2px; }
+  .card .sub { font-size: 12px; color: var(--text-muted); margin: 0 0 18px; }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 168px 1fr 52px;
+    align-items: center;
+    gap: 10px;
+    height: 26px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .bar-row .name {
+    font-size: 12.5px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bar-track {
+    position: relative;
+    height: 16px;
+    background: transparent;
+    border-bottom: 1px solid var(--gridline);
+  }
+  .bar-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    border-radius: 0 4px 4px 0;
+    transition: opacity .15s ease;
+    cursor: pointer;
+  }
+  .bar-row .val {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .bar-row.dim .bar-fill { opacity: 0.18; }
+  .bar-row.dim .name, .bar-row.dim .val { color: var(--text-muted); }
+
+  .axis-caption {
+    display: grid;
+    grid-template-columns: 168px 1fr 52px;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .axis-caption span:nth-child(2) { text-align: right; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--gridline);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .legend-item .swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: var(--text-primary);
+    color: var(--surface-1);
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    line-height: 1.4;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity .1s ease;
+    max-width: 220px;
+  }
+  .tooltip.show { opacity: 1; }
+  .tooltip .t-val { font-weight: 650; font-size: 13px; }
+  .tooltip .t-sub { color: var(--baseline); font-size: 11px; }
+
+  /* Card grid */
+  .grid-title { font-size: 15px; font-weight: 650; margin: 0 0 14px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .site-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .site-card .top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .site-card .name { font-size: 14.5px; font-weight: 650; line-height: 1.3; }
+  .badge {
+    font-size: 10.5px;
+    font-weight: 650;
+    padding: 3px 8px;
+    border-radius: 999px;
+    color: #fff;
+    white-space: nowrap;
+    flex: none;
+  }
+  .site-card .meta { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+  .site-card .desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin: 2px 0 4px; }
+  .site-card .facts {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--gridline);
+  }
+  .site-card .facts .fk { color: var(--text-muted); }
+  .site-card .facts .fv { font-weight: 600; }
+
+  /* Table view */
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.data-table th, table.data-table td {
+    text-align: left;
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--gridline);
+  }
+  table.data-table th { color: var(--text-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .02em; }
+  table.data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.data-table .cat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+
+  footer.note { font-size: 11.5px; color: var(--text-muted); margin-top: 20px; line-height: 1.6; }
+
+  @media (max-width: 860px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .bar-row { grid-template-columns: 110px 1fr 44px; }
+    .axis-caption { grid-template-columns: 110px 1fr 44px; }
+  }
+  @media (max-width: 560px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="viz-root">
+  <div class="wrap">
+    <header class="page-head">
+      <h1>London Tourist Sites Dashboard</h1>
+      <p>An overview of London's major museums, historic sites, landmarks, parks and markets — annual visitor figures, entry prices, and locations at a glance.</p>
+    </header>
+
+    <div class="stats">
+      <div class="stat-tile"><div class="label">Sites featured</div><div class="value">18</div></div>
+      <div class="stat-tile"><div class="label">Combined annual visitors</div><div class="value">40.2M</div></div>
+      <div class="stat-tile"><div class="label">Free-entry sites</div><div class="value">10</div></div>
+      <div class="stat-tile"><div class="label">Boroughs covered</div><div class="value">8</div></div>
+    </div>
+
+    <div class="filters" id="filters">
+      <button class="chip" data-cat="all" aria-pressed="true">All sites</button>
+      <button class="chip" data-cat="museums"><span class="dot" style="background:var(--series-1)"></span>Museums &amp; Galleries</button>
+      <button class="chip" data-cat="historic"><span class="dot" style="background:var(--series-2)"></span>Historic Sites &amp; Palaces</button>
+      <button class="chip" data-cat="landmarks"><span class="dot" style="background:var(--series-3)"></span>Landmarks &amp; Attractions</button>
+      <button class="chip" data-cat="parks"><span class="dot" style="background:var(--series-4)"></span>Parks &amp; Gardens</button>
+      <button class="chip" data-cat="markets"><span class="dot" style="background:var(--series-5)"></span>Markets &amp; Neighbourhoods</button>
+      <button class="view-toggle" id="viewToggle">View as table</button>
+    </div>
+
+    <div class="card">
+      <h2>Annual visitors by attraction</h2>
+      <p class="sub">Ticketed and measured attractions only — approximate published figures, most recent full year. Open parks and street markets aren't directly comparable and are excluded here (see cards below).</p>
+      <div id="chart"></div>
+      <div class="axis-caption"><span></span><span>0</span><span></span></div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <h2 class="grid-title" id="gridTitle">All sites</h2>
+    <div class="grid" id="cardGrid"></div>
+
+    <div id="tableWrap" style="display:none;">
+      <div class="card" style="padding:0; overflow-x:auto;">
+        <table class="data-table" id="dataTable">
+          <thead>
+            <tr>
+              <th>Site</th><th>Category</th><th>Borough</th><th class="num">Visitors / footfall</th><th class="num">Entry price</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer class="note">
+      Visitor figures are approximate, illustrative estimates based on typically reported annual attendance (most recent full year) and are intended for general comparison, not precise reporting. Market and neighbourhood numbers are rough footfall estimates rather than ticketed admissions. Prices are approximate standard adult rates and vary by season, offer and booking channel.
+    </footer>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+(function () {
+  var CAT = {
+    museums:  { label: 'Museums & Galleries',        color: 'var(--series-1)' },
+    historic: { label: 'Historic Sites & Palaces',    color: 'var(--series-2)' },
+    landmarks:{ label: 'Landmarks & Attractions',     color: 'var(--series-3)' },
+    parks:    { label: 'Parks & Gardens',             color: 'var(--series-4)' },
+    markets:  { label: 'Markets & Neighbourhoods',    color: 'var(--series-5)' }
+  };
+
+  var SITES = [
+    { name: 'British Museum', cat: 'museums', borough: 'Camden', desc: 'World-spanning collection from Egyptian mummies to the Rosetta Stone.', stat: '5.8M / yr', statVal: 5.8, price: 'Free', ticketed: true },
+    { name: 'Natural History Museum', cat: 'museums', borough: 'Kensington & Chelsea', desc: 'Dinosaur skeletons, a blue whale, and the earth sciences under one roof.', stat: '5.3M / yr', statVal: 5.3, price: 'Free', ticketed: true },
+    { name: 'Tate Modern', cat: 'museums', borough: 'Southwark', desc: 'Modern and contemporary art in a former power station on the Thames.', stat: '4.6M / yr', statVal: 4.6, price: 'Free', ticketed: true },
+    { name: 'National Gallery', cat: 'museums', borough: 'Westminster', desc: 'Western European painting from the 13th to 19th centuries.', stat: '4.5M / yr', statVal: 4.5, price: 'Free', ticketed: true },
+    { name: 'Science Museum', cat: 'museums', borough: 'Kensington & Chelsea', desc: 'Hands-on galleries covering flight, space, medicine and computing.', stat: '3.2M / yr', statVal: 3.2, price: 'Free', ticketed: true },
+    { name: 'V&A (Victoria and Albert Museum)', cat: 'museums', borough: 'Kensington & Chelsea', desc: 'The world’s leading museum of art, design and performance.', stat: '3.0M / yr', statVal: 3.0, price: 'Free', ticketed: true },
+    { name: 'Tower of London', cat: 'historic', borough: 'Tower Hamlets', desc: 'Historic castle and home of the Crown Jewels, guarded by Yeoman Warders.', stat: '2.9M / yr', statVal: 2.9, price: '£34.80', ticketed: true },
+    { name: 'St Paul’s Cathedral', cat: 'historic', borough: 'City of London', desc: 'Wren’s baroque masterpiece, famous for its dome and Whispering Gallery.', stat: '1.6M / yr', statVal: 1.6, price: '£25', ticketed: true },
+    { name: 'Westminster Abbey', cat: 'historic', borough: 'Westminster', desc: 'Coronation church of British monarchs and resting place of statesmen and poets.', stat: '1.4M / yr', statVal: 1.4, price: '£29', ticketed: true },
+    { name: 'Buckingham Palace (State Rooms)', cat: 'historic', borough: 'Westminster', desc: 'The King’s official residence; State Rooms open to visitors in summer.', stat: '0.6M / yr', statVal: 0.6, price: '£32', ticketed: true },
+    { name: 'London Eye', cat: 'landmarks', borough: 'Lambeth', desc: 'Giant observation wheel on the South Bank with views across the city.', stat: '3.0M / yr', statVal: 3.0, price: '£29', ticketed: true },
+    { name: 'The Shard', cat: 'landmarks', borough: 'Southwark', desc: 'Western Europe’s tallest building, with a viewing gallery near the top.', stat: '1.0M / yr', statVal: 1.0, price: '£26', ticketed: true },
+    { name: 'Tower Bridge', cat: 'landmarks', borough: 'Tower Hamlets', desc: 'Victorian bascule bridge with a glass-floored walkway and engine rooms.', stat: '1.0M / yr', statVal: 1.0, price: '£13.20', ticketed: true },
+    { name: 'Kew Gardens', cat: 'parks', borough: 'Richmond upon Thames', desc: 'Royal Botanic Gardens with glasshouses, a treetop walkway and a pagoda.', stat: '2.3M / yr', statVal: 2.3, price: '£22', ticketed: true },
+    { name: 'Hyde Park', cat: 'parks', borough: 'Westminster', desc: 'Central London’s largest royal park, with the Serpentine and Speakers’ Corner.', stat: 'Open green space', statVal: null, price: 'Free', ticketed: false },
+    { name: 'Regent’s Park', cat: 'parks', borough: 'Camden / Westminster', desc: 'Formal gardens, open lawns and London Zoo on its northern edge.', stat: 'Open green space', statVal: null, price: 'Free', ticketed: false },
+    { name: 'Camden Market', cat: 'markets', borough: 'Camden', desc: 'Sprawling market stalls, food vendors and independent shops by the canal.', stat: '~10M footfall / yr (est.)', statVal: null, price: 'Free', ticketed: false },
+    { name: 'Covent Garden', cat: 'markets', borough: 'Westminster', desc: 'Historic market piazza with street performers, shops and cafes.', stat: '~7M footfall / yr (est.)', statVal: null, price: 'Free', ticketed: false }
+  ];
+
+  var filtersEl = document.getElementById('filters');
+  var chartEl = document.getElementById('chart');
+  var legendEl = document.getElementById('legend');
+  var gridEl = document.getElementById('cardGrid');
+  var gridTitleEl = document.getElementById('gridTitle');
+  var tableBody = document.getElementById('tableBody');
+  var tooltip = document.getElementById('tooltip');
+  var viewToggle = document.getElementById('viewToggle');
+  var tableWrap = document.getElementById('tableWrap');
+  var activeCat = 'all';
+  var tableView = false;
+
+  function fmt(v) { return v.toFixed(1).replace(/\.0$/, '') + 'M'; }
+
+  function buildLegend() {
+    legendEl.innerHTML = '';
+    Object.keys(CAT).forEach(function (key) {
+      var item = document.createElement('div');
+      item.className = 'legend-item';
+      var sw = document.createElement('span');
+      sw.className = 'swatch';
+      sw.style.background = CAT[key].color;
+      var label = document.createElement('span');
+      label.textContent = CAT[key].label;
+      item.appendChild(sw);
+      item.appendChild(label);
+      legendEl.appendChild(item);
+    });
+  }
+
+  function buildChart() {
+    chartEl.innerHTML = '';
+    var ticketed = SITES.filter(function (s) { return s.ticketed; })
+      .sort(function (a, b) { return b.statVal - a.statVal; });
+    var max = Math.max.apply(null, ticketed.map(function (s) { return s.statVal; }));
+
+    ticketed.forEach(function (s) {
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+      row.dataset.cat = s.cat;
+
+      var name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = s.name;
+
+      var track = document.createElement('div');
+      track.className = 'bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'bar-fill';
+      fill.style.width = (s.statVal / max * 100) + '%';
+      fill.style.background = CAT[s.cat].color;
+      fill.tabIndex = 0;
+
+      fill.addEventListener('pointermove', function (e) { showTooltip(e, s); });
+      fill.addEventListener('focus', function (e) { showTooltip(e, s); });
+      fill.addEventListener('pointerleave', hideTooltip);
+      fill.addEventListener('blur', hideTooltip);
+
+      track.appendChild(fill);
+
+      var val = document.createElement('div');
+      val.className = 'val';
+      val.textContent = fmt(s.statVal);
+
+      row.appendChild(name);
+      row.appendChild(track);
+      row.appendChild(val);
+      chartEl.appendChild(row);
+    });
+  }
+
+  function showTooltip(e, s) {
+    tooltip.innerHTML = '';
+    var val = document.createElement('div');
+    val.className = 't-val';
+    val.textContent = fmt(s.statVal) + ' visitors / yr';
+    var name = document.createElement('div');
+    name.textContent = s.name;
+    var sub = document.createElement('div');
+    sub.className = 't-sub';
+    sub.textContent = CAT[s.cat].label + ' · ' + s.borough;
+    tooltip.appendChild(val);
+    tooltip.appendChild(name);
+    tooltip.appendChild(sub);
+    tooltip.classList.add('show');
+    var x = e.clientX + 14, y = e.clientY + 14;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+  }
+  function hideTooltip() { tooltip.classList.remove('show'); }
+
+  function buildCards() {
+    gridEl.innerHTML = '';
+    var list = activeCat === 'all' ? SITES : SITES.filter(function (s) { return s.cat === activeCat; });
+    list.forEach(function (s) {
+      var card = document.createElement('div');
+      card.className = 'site-card';
+
+      var top = document.createElement('div');
+      top.className = 'top-row';
+      var name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = s.name;
+      var badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.style.background = CAT[s.cat].color;
+      badge.textContent = CAT[s.cat].label;
+      top.appendChild(name);
+      top.appendChild(badge);
+
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = s.borough;
+
+      var desc = document.createElement('div');
+      desc.className = 'desc';
+      desc.textContent = s.desc;
+
+      var facts = document.createElement('div');
+      facts.className = 'facts';
+      facts.innerHTML =
+        '<span><span class="fk">Visitors&nbsp;</span><span class="fv" data-fv-stat></span></span>' +
+        '<span><span class="fk">Entry&nbsp;</span><span class="fv" data-fv-price></span></span>';
+      facts.querySelector('[data-fv-stat]').textContent = s.stat;
+      facts.querySelector('[data-fv-price]').textContent = s.price;
+
+      card.appendChild(top);
+      card.appendChild(meta);
+      card.appendChild(desc);
+      card.appendChild(facts);
+      gridEl.appendChild(card);
+    });
+    gridTitleEl.textContent = activeCat === 'all' ? 'All sites' : CAT[activeCat].label;
+  }
+
+  function buildTable() {
+    tableBody.innerHTML = '';
+    var list = activeCat === 'all' ? SITES : SITES.filter(function (s) { return s.cat === activeCat; });
+    list.forEach(function (s) {
+      var tr = document.createElement('tr');
+
+      var tdName = document.createElement('td');
+      tdName.textContent = s.name;
+
+      var tdCat = document.createElement('td');
+      var dot = document.createElement('span');
+      dot.className = 'cat-dot';
+      dot.style.background = CAT[s.cat].color;
+      tdCat.appendChild(dot);
+      tdCat.appendChild(document.createTextNode(CAT[s.cat].label));
+
+      var tdBorough = document.createElement('td');
+      tdBorough.textContent = s.borough;
+
+      var tdStat = document.createElement('td');
+      tdStat.className = 'num';
+      tdStat.textContent = s.stat;
+
+      var tdPrice = document.createElement('td');
+      tdPrice.className = 'num';
+      tdPrice.textContent = s.price;
+
+      tr.appendChild(tdName);
+      tr.appendChild(tdCat);
+      tr.appendChild(tdBorough);
+      tr.appendChild(tdStat);
+      tr.appendChild(tdPrice);
+      tableBody.appendChild(tr);
+    });
+  }
+
+  function applyFilter(cat) {
+    activeCat = cat;
+    Array.prototype.forEach.call(filtersEl.querySelectorAll('.chip'), function (chip) {
+      chip.setAttribute('aria-pressed', chip.dataset.cat === cat ? 'true' : 'false');
+    });
+    Array.prototype.forEach.call(chartEl.querySelectorAll('.bar-row'), function (row) {
+      row.classList.toggle('dim', cat !== 'all' && row.dataset.cat !== cat);
+    });
+    buildCards();
+    buildTable();
+  }
+
+  filtersEl.addEventListener('click', function (e) {
+    var chip = e.target.closest('.chip');
+    if (!chip) return;
+    applyFilter(chip.dataset.cat);
+  });
+
+  viewToggle.addEventListener('click', function () {
+    tableView = !tableView;
+    tableWrap.style.display = tableView ? 'block' : 'none';
+    gridEl.style.display = tableView ? 'none' : 'grid';
+    viewToggle.textContent = tableView ? 'View as cards' : 'View as table';
+  });
+
+  buildLegend();
+  buildChart();
+  buildCards();
+  buildTable();
+})();
+</script>
