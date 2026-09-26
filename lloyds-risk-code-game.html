@@ -1,0 +1,1597 @@
+<title>Code the Slip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --display: "Big Shoulders Display", "Big Shoulders", "Oswald", "Arial Narrow", sans-serif;
+    --body: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --typed: "Courier Prime", "Courier New", ui-monospace, monospace;
+
+    /* Steel-and-slip palette: brushed steel ground, paper slips, violet stamp ink */
+    --ground:     #E2E7EB;
+    --ground-2:   #D5DCE2;
+    --panel:      #F1F4F6;
+    --slip:       #FCFDFD;
+    --slip-line:  #E3EAF0;
+    --ink:        #16202C;
+    --ink-2:      #455161;
+    --ink-3:      #6C7887;
+    --rule:       #C4CDD6;
+    --rule-soft:  #DAE1E7;
+    --stamp:      #4636A6;
+    --stamp-soft: rgba(70, 54, 166, 0.09);
+    --brass:      #8F6820;
+    --ok:         #17744A;
+    --ok-soft:    rgba(23, 116, 74, 0.11);
+    --bad:        #B42318;
+    --bad-soft:   rgba(180, 35, 24, 0.09);
+    --shadow:     0 1px 0 rgba(22, 32, 44, 0.06), 0 22px 40px -26px rgba(22, 32, 44, 0.55);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground:     #0E1318;
+      --ground-2:   #141B22;
+      --panel:      #151D25;
+      --slip:       #1B242E;
+      --slip-line:  #222D39;
+      --ink:        #E6EBF0;
+      --ink-2:      #A9B4C0;
+      --ink-3:      #7F8A97;
+      --rule:       #2F3B48;
+      --rule-soft:  #24303B;
+      --stamp:      #A99DFF;
+      --stamp-soft: rgba(169, 157, 255, 0.10);
+      --brass:      #D8A84E;
+      --ok:         #52C991;
+      --ok-soft:    rgba(82, 201, 145, 0.13);
+      --bad:        #FF7D70;
+      --bad-soft:   rgba(255, 125, 112, 0.11);
+      --shadow:     0 1px 0 rgba(0, 0, 0, 0.35), 0 22px 40px -26px rgba(0, 0, 0, 0.9);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground:     #0E1318;
+    --ground-2:   #141B22;
+    --panel:      #151D25;
+    --slip:       #1B242E;
+    --slip-line:  #222D39;
+    --ink:        #E6EBF0;
+    --ink-2:      #A9B4C0;
+    --ink-3:      #7F8A97;
+    --rule:       #2F3B48;
+    --rule-soft:  #24303B;
+    --stamp:      #A99DFF;
+    --stamp-soft: rgba(169, 157, 255, 0.10);
+    --brass:      #D8A84E;
+    --ok:         #52C991;
+    --ok-soft:    rgba(82, 201, 145, 0.13);
+    --bad:        #FF7D70;
+    --bad-soft:   rgba(255, 125, 112, 0.11);
+    --shadow:     0 1px 0 rgba(0, 0, 0, 0.35), 0 22px 40px -26px rgba(0, 0, 0, 0.9);
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--ground); }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; }
+  a { color: var(--stamp); text-underline-offset: 2px; }
+
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-inline: clamp(16px, 4vw, 36px);
+    padding-block: 28px 64px;
+  }
+
+  /* Masthead */
+  .masthead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px 32px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .brand { display: grid; gap: 6px; max-width: 60ch; }
+  .eyebrow {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: clamp(2.6rem, 7vw, 4.4rem);
+    line-height: 0.86;
+    letter-spacing: 0.005em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+  h1 .ink { color: var(--stamp); }
+  .lede { margin: 4px 0 0; color: var(--ink-2); max-width: 52ch; }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tab {
+    appearance: none;
+    border: 1px solid var(--rule);
+    background: transparent;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .tab:hover { background: var(--panel); color: var(--ink); }
+  .tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--ground); }
+
+  section[role="tabpanel"] { padding-top: 24px; }
+
+  /* Play layout */
+  .play-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 900px) { .play-grid { grid-template-columns: minmax(0, 1fr); } }
+  .main-col { display: grid; gap: 16px; min-width: 0; }
+
+  .scoreline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px 28px;
+  }
+  .stat { display: grid; gap: 0; }
+  .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .stat-val {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-val.brass { color: var(--brass); display: inline-flex; align-items: center; gap: 6px; }
+  .stat-val.brass svg { width: 20px; height: 20px; }
+  .marks {
+    list-style: none;
+    margin: 0 0 4px auto;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: 100%;
+  }
+  .marks li {
+    width: 12px;
+    height: 16px;
+    border-radius: 2px;
+    border: 1px solid var(--rule);
+    background: var(--slip);
+  }
+  .marks li.ok { background: var(--ok); border-color: var(--ok); }
+  .marks li.bad { background: var(--bad); border-color: var(--bad); }
+  .marks li.now { border: 2px solid var(--stamp); }
+
+  /* The slip */
+  .slip {
+    position: relative;
+    background: var(--slip);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: var(--shadow);
+  }
+  .slip-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px 16px;
+    padding: 14px 20px 12px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .slip-no {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .umr { font-family: var(--typed); font-size: 13px; color: var(--ink-3); }
+  .fields { margin: 0; padding: 4px 20px 6px; }
+  .field {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--slip-line);
+  }
+  .field:last-child { border-bottom: 0; }
+  .field dt {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding-top: 3px;
+  }
+  .field dd { margin: 0; font-family: var(--typed); font-size: 16px; color: var(--ink); min-width: 0; overflow-wrap: anywhere; }
+  .field dd.risk { font-size: clamp(18px, 2.4vw, 21px); line-height: 1.4; font-weight: 700; }
+  .field dd.muted { color: var(--ink-3); }
+  @media (max-width: 480px) {
+    .field { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  }
+
+  .slip-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+    padding: 12px 20px 18px;
+    border-top: 1px dashed var(--rule);
+  }
+  .codebox {
+    position: relative;
+    width: 150px;
+    height: 104px;
+    border: 1.5px solid var(--ink-2);
+    border-radius: 2px;
+    display: grid;
+    place-items: center;
+    flex: none;
+  }
+  .codebox-label {
+    position: absolute;
+    top: 4px;
+    left: 7px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .codebox .blank { font-family: var(--display); font-size: 2.6rem; font-weight: 800; color: var(--rule); }
+  .foot-note { color: var(--ink-3); font-size: 13px; max-width: 34ch; }
+  .foot-note kbd {
+    font-family: var(--typed);
+    font-size: 12px;
+    border: 1px solid var(--rule);
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    padding: 0 5px;
+    color: var(--ink-2);
+    background: var(--panel);
+  }
+
+  /* Stamp impression */
+  .impression {
+    --c: var(--stamp);
+    display: grid;
+    justify-items: center;
+    gap: 1px;
+    padding: 4px 10px 5px;
+    border: 3px double var(--c);
+    border-radius: 6px;
+    color: var(--c);
+    transform: rotate(-6deg);
+    filter: url(#ink);
+    opacity: 0.92;
+  }
+  .impression .ic { font-family: var(--display); font-weight: 900; font-size: 2.7rem; line-height: 0.95; letter-spacing: 0.02em; }
+  .impression .il { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
+  .impression.ok { --c: var(--ok); }
+  .impression.bad { --c: var(--bad); }
+  .impression.void { --c: var(--ink-3); border-style: dashed; transform: rotate(-3deg); }
+  .impression.void .ic { text-decoration: line-through; text-decoration-thickness: 3px; }
+  .impression.land { animation: land 260ms cubic-bezier(.2, .9, .3, 1.2) both; }
+  @keyframes land {
+    from { transform: rotate(-6deg) scale(1.6); opacity: 0; }
+    to   { transform: rotate(-6deg) scale(1); opacity: 0.92; }
+  }
+
+  /* Options rack */
+  .rack { display: grid; gap: 10px; }
+  .rack-codes { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 560px) { .rack-codes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .opt {
+    position: relative;
+    appearance: none;
+    cursor: pointer;
+    background: var(--slip);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    text-align: left;
+    transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+  }
+  .opt:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--stamp); background: var(--stamp-soft); }
+  .opt:disabled { cursor: default; }
+  .opt .key {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-family: var(--typed);
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+  .opt-code {
+    display: grid;
+    place-items: center;
+    min-height: 86px;
+    padding: 10px 8px;
+    color: var(--stamp);
+    box-shadow: inset 0 0 0 4px var(--slip), inset 0 0 0 5.5px currentColor;
+  }
+  .opt-code .big { font-family: var(--display); font-weight: 900; font-size: 2.5rem; line-height: 1; letter-spacing: 0.02em; }
+  .opt-code .small { font-family: var(--display); font-weight: 800; font-size: 1.35rem; line-height: 1.1; text-align: center; }
+  .opt-desc {
+    display: block;
+    padding: 12px 40px 12px 16px;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .opt.is-right { border-color: var(--ok); background: var(--ok-soft); color: var(--ok); }
+  .opt.is-wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
+  .opt.is-right.opt-desc, .opt.is-wrong.opt-desc { color: var(--ink); }
+  .opt.is-right.opt-desc { box-shadow: inset 4px 0 0 var(--ok); }
+  .opt.is-wrong.opt-desc { box-shadow: inset 4px 0 0 var(--bad); }
+  .opt.is-dim { opacity: 0.45; }
+
+  .typed-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; }
+  .typed-form input {
+    width: 150px;
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 2.4rem;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 0.08em;
+    color: var(--stamp);
+    background: var(--slip);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 6px 10px;
+  }
+  .btn {
+    appearance: none;
+    cursor: pointer;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--ground);
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .btn:hover { background: var(--stamp); border-color: var(--stamp); color: var(--slip); }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: var(--rule); }
+  .btn.ghost:hover { border-color: var(--stamp); color: var(--stamp); background: var(--stamp-soft); }
+
+  /* Feedback */
+  .feedback {
+    display: grid;
+    gap: 10px;
+    padding: 16px 18px;
+    border-radius: 6px;
+    background: var(--panel);
+    border: 1px solid var(--rule-soft);
+  }
+  .verdict {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.6rem;
+    text-transform: uppercase;
+    line-height: 1.1;
+  }
+  .verdict.ok { color: var(--ok); }
+  .verdict.bad { color: var(--bad); }
+  .verdict .pts { font-family: var(--body); font-size: 13px; font-weight: 600; text-transform: none; color: var(--ink-2); }
+  .answer-line { margin: 0; display: flex; gap: 10px; align-items: baseline; }
+  .answer-line .chip { flex: none; }
+  .answer-line.given { color: var(--ink-2); font-size: 14px; }
+  .chip {
+    display: inline-block;
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 1.05rem;
+    line-height: 1;
+    letter-spacing: 0.03em;
+    color: var(--stamp);
+    border: 1.5px solid currentColor;
+    border-radius: 4px;
+    padding: 3px 6px 2px;
+    min-width: 2.2em;
+    text-align: center;
+  }
+  .chip.ok { color: var(--ok); }
+  .chip.bad { color: var(--bad); }
+  .chip.muted { color: var(--ink-3); }
+  .tips { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+  .tips li {
+    font-size: 14px;
+    color: var(--ink-2);
+    padding-left: 14px;
+    border-left: 2px solid var(--brass);
+  }
+  .feedback-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+  /* End of game */
+  .endcard { padding: 20px; display: grid; gap: 18px; }
+  .endcard h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 2.4rem;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+  .bell-line { display: flex; gap: 10px; align-items: center; color: var(--brass); font-weight: 600; margin: 0; }
+  .bell-line svg { width: 26px; height: 26px; flex: none; }
+  .end-stats { display: flex; flex-wrap: wrap; gap: 12px 32px; }
+  .class-rows { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .class-row { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr) 48px; gap: 12px; align-items: center; font-size: 14px; }
+  .class-row .bar { height: 8px; border-radius: 4px; background: var(--rule-soft); overflow: hidden; }
+  .class-row .bar span { display: block; height: 100%; background: var(--ok); }
+  .class-row .n { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+  @media (max-width: 480px) { .class-row { grid-template-columns: minmax(0, 1fr) 48px; } .class-row .bar { grid-column: 1 / -1; grid-row: 2; } }
+  .missed { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .missed li { display: flex; gap: 10px; align-items: baseline; font-size: 14px; }
+  h3.sub {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* Side panel */
+  .side { display: grid; gap: 18px; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--rule-soft);
+    border-radius: 8px;
+    padding: 16px;
+    display: grid;
+    gap: 14px;
+  }
+  .panel h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.45rem;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 6px; min-width: 0; }
+  legend {
+    padding: 0;
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .radio-row { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; cursor: pointer; }
+  .radio-row input { margin-top: 3px; accent-color: var(--stamp); }
+  .radio-row small { display: block; color: var(--ink-3); font-size: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chipbox { position: relative; }
+  .chipbox input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .chipbox span {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--rule);
+    font-size: 12.5px;
+    color: var(--ink-2);
+    cursor: pointer;
+    background: var(--slip);
+  }
+  .chipbox input:checked + span { background: var(--stamp-soft); border-color: var(--stamp); color: var(--stamp); font-weight: 600; }
+  .chipbox input:focus-visible + span { outline: 2px solid var(--stamp); outline-offset: 2px; }
+  .linkbtn {
+    appearance: none;
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--stamp);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; width: max-content; }
+  .seg label { position: relative; }
+  .seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .seg span { display: block; padding: 5px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-variant-numeric: tabular-nums; color: var(--ink-2); background: var(--slip); }
+  .seg label + label span { border-left: 1px solid var(--rule); }
+  .seg input:checked + span { background: var(--ink); color: var(--ground); }
+  .seg input:focus-visible + span { outline: 2px solid var(--stamp); outline-offset: -2px; }
+  .toggle { display: flex; gap: 8px; align-items: center; font-size: 14px; cursor: pointer; }
+  .toggle input { accent-color: var(--stamp); }
+  .deckinfo { font-size: 13px; color: var(--ink-2); margin: 0; }
+  .deckinfo b { color: var(--ink); }
+
+  /* Code book */
+  .book-head { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; }
+  .book-head h2, .import h2 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 2.2rem;
+    text-transform: uppercase;
+    line-height: 0.95;
+  }
+  .search {
+    width: min(320px, 100%);
+    padding: 9px 12px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: var(--slip);
+  }
+  .book-filters { display: grid; gap: 10px; margin-bottom: 18px; }
+  .patterns {
+    margin: 0 0 22px;
+    padding: 16px 18px;
+    background: var(--panel);
+    border-radius: 8px;
+    border: 1px solid var(--rule-soft);
+  }
+  .patterns ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+  .patterns li { font-size: 14px; color: var(--ink-2); padding-left: 12px; border-left: 2px solid var(--brass); }
+  .table-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--slip); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--ink);
+    background: var(--slip);
+    position: sticky;
+    top: 0;
+  }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--slip-line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td.code { width: 64px; }
+  td.cls { color: var(--ink-2); white-space: nowrap; }
+  td.status { white-space: nowrap; }
+  td.score { color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.retired td.desc { color: var(--ink-2); }
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--ok-soft);
+    color: var(--ok);
+  }
+  .pill.ret { background: var(--rule-soft); color: var(--ink-2); }
+  .book-count { color: var(--ink-3); font-size: 13px; margin: 10px 0 0; }
+
+  /* Import */
+  .import { display: grid; gap: 18px; max-width: 68ch; }
+  .import p { margin: 0; color: var(--ink-2); }
+  .import ol { margin: 0; padding-left: 20px; color: var(--ink-2); display: grid; gap: 6px; }
+  .filepick {
+    display: grid;
+    gap: 10px;
+    padding: 18px;
+    border: 1.5px dashed var(--rule);
+    border-radius: 8px;
+    background: var(--slip);
+  }
+  .filepick input { max-width: 100%; }
+  .msg { font-size: 14px; margin: 0; color: var(--ink-2); }
+  .msg.ok { color: var(--ok); }
+  .msg.bad { color: var(--bad); }
+
+  .source-note {
+    margin-top: 40px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    font-size: 12.5px;
+    color: var(--ink-3);
+    max-width: 90ch;
+  }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .impression.land { animation: none; }
+    .opt { transition: none; }
+    .opt:hover:not(:disabled) { transform: none; }
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="ink" x="-10%" y="-10%" width="120%" height="120%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="11" result="noise"></feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.4" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+  </filter>
+  <symbol id="bell" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M12 2a1.5 1.5 0 0 1 1.5 1.5v.6A6.5 6.5 0 0 1 18.5 10.5v4.2l1.8 2.4a.8.8 0 0 1-.64 1.3H4.34a.8.8 0 0 1-.64-1.3l1.8-2.4v-4.2A6.5 6.5 0 0 1 10.5 4.1v-.6A1.5 1.5 0 0 1 12 2Zm-2.6 17.8h5.2a2.6 2.6 0 0 1-5.2 0Z"></path>
+  </symbol>
+</svg>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">
+      <p class="eyebrow">Lloyd's risk codes · unofficial study drill</p>
+      <h1>Code the <span class="ink">Slip</span></h1>
+      <p class="lede">A broker slides a slip across the box. Stamp the right two-character risk code, learn the pattern behind it, and move to the next one.</p>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-play" aria-controls="play" aria-selected="true">Play</button>
+      <button class="tab" role="tab" id="tab-codebook" aria-controls="codebook" aria-selected="false">Code book</button>
+      <button class="tab" role="tab" id="tab-import" aria-controls="import" aria-selected="false">Load official list</button>
+    </nav>
+  </header>
+
+  <!-- PLAY -->
+  <section id="play" role="tabpanel" aria-labelledby="tab-play">
+    <div class="play-grid">
+      <div class="main-col">
+        <div class="scoreline">
+          <div class="stat"><span class="stat-label">Score</span><span class="stat-val" id="sScore">0</span></div>
+          <div class="stat"><span class="stat-label">Streak</span><span class="stat-val brass" id="sStreak">0</span></div>
+          <div class="stat"><span class="stat-label">Best game</span><span class="stat-val" id="sBest">0</span></div>
+          <ol class="marks" id="marks" aria-label="Slips in this game"></ol>
+        </div>
+
+        <article class="slip" id="slip" aria-live="polite"></article>
+        <div id="rack"></div>
+        <div id="feedback"></div>
+      </div>
+
+      <aside class="side">
+        <form class="panel" id="settingsForm">
+          <h2>Next game</h2>
+          <fieldset>
+            <legend>Mode</legend>
+            <label class="radio-row"><input type="radio" name="mode" value="mixed" id="mode-mixed"><span>Mixed slips<small>A bit of everything</small></span></label>
+            <label class="radio-row"><input type="radio" name="mode" value="stamp" id="mode-stamp"><span>Stamp the slip<small>See the risk, pick the code</small></span></label>
+            <label class="radio-row"><input type="radio" name="mode" value="read" id="mode-read"><span>Read the stamp<small>See the code, pick the risk</small></span></label>
+            <label class="radio-row"><input type="radio" name="mode" value="type" id="mode-type"><span>Typed slip<small>No options. Type the code from memory</small></span></label>
+            <label class="radio-row"><input type="radio" name="mode" value="retired" id="mode-retired"><span>Retired codes<small>Name the code that replaced it</small></span></label>
+          </fieldset>
+          <fieldset>
+            <legend>Classes</legend>
+            <div class="chips" id="classChips"></div>
+            <div class="chips"><button type="button" class="linkbtn" id="clsAll">All classes</button><button type="button" class="linkbtn" id="clsNone">Clear</button></div>
+          </fieldset>
+          <fieldset>
+            <legend>Slips per game</legend>
+            <div class="seg" role="radiogroup" aria-label="Slips per game">
+              <label><input type="radio" name="len" value="10" id="len-10"><span>10</span></label>
+              <label><input type="radio" name="len" value="20" id="len-20"><span>20</span></label>
+              <label><input type="radio" name="len" value="40" id="len-40"><span>40</span></label>
+            </div>
+          </fieldset>
+          <label class="toggle"><input type="checkbox" id="sound"> Ring the bell (sound)</label>
+          <button class="btn" type="submit" id="startBtn">Start a new game</button>
+          <p class="deckinfo" id="deckInfo"></p>
+        </form>
+      </aside>
+    </div>
+  </section>
+
+  <!-- CODE BOOK -->
+  <section id="codebook" role="tabpanel" aria-labelledby="tab-codebook" hidden>
+    <div class="book-head">
+      <h2>Code book</h2>
+      <label class="sr-only" for="cbSearch">Search codes</label>
+      <input class="search" type="search" id="cbSearch" placeholder="Search a code or a word, e.g. E5 or cargo">
+    </div>
+    <div class="patterns">
+      <h3 class="sub">Patterns worth knowing</h3>
+      <ul id="patternList"></ul>
+    </div>
+    <div class="book-filters">
+      <div class="chips" id="cbClasses" role="group" aria-label="Filter by class"></div>
+      <label class="toggle"><input type="checkbox" id="cbRetired" checked> Show retired codes</label>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th scope="col">Code</th><th scope="col">What it covers</th><th scope="col">Class</th><th scope="col">Status</th><th scope="col">Your record</th></tr></thead>
+        <tbody id="cbBody"></tbody>
+      </table>
+    </div>
+    <p class="book-count" id="cbCount"></p>
+  </section>
+
+  <!-- IMPORT -->
+  <section id="import" role="tabpanel" aria-labelledby="tab-import" hidden>
+    <div class="import">
+      <h2>Play with the official list</h2>
+      <p>The built-in deck was compiled from Lloyd's published risk code guidance and mapping notes, with descriptions shortened for play. Lloyd's treats its own risk code spreadsheet as the only authoritative list, and codes change each year of account. Load that spreadsheet here to play with the exact current codes.</p>
+      <ol>
+        <li>Open <a href="https://www.lloyds.com/market-resources/underwriting/risk-codes" target="_blank" rel="noopener">Lloyd's risk codes page</a> and download the risk codes spreadsheet (Excel).</li>
+        <li>Choose the file below. It is read in your browser and is not uploaded anywhere.</li>
+        <li>The game finds the columns headed “Risk code” and “Description”, and uses a class or group column if there is one.</li>
+      </ol>
+      <div class="filepick">
+        <label for="importFile"><b>Risk code spreadsheet</b> (.xlsx, .xls or .csv)</label>
+        <input type="file" id="importFile" accept=".xlsx,.xls,.csv">
+        <p class="msg" id="importMsg" role="status"></p>
+        <div><button class="btn ghost" type="button" id="resetDeck">Go back to the built-in deck</button></div>
+      </div>
+      <p class="deckinfo" id="deckInfo2"></p>
+    </div>
+  </section>
+
+  <p class="source-note">An unofficial study aid, not affiliated with or endorsed by Lloyd's. Built-in descriptions are paraphrased from Lloyd's risk code guidance and mapping notes (2021 to July 2026 editions) and market bulletins. The 2026 year of account added transactional liability, political risk, credit and financial guarantee codes, and the 2027 year of account adds six more; the built-in deck does not list all of them. Always check the Lloyd's spreadsheet before coding a live risk.</p>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- Data ----------
+  const CLASSES = [
+    { k: "avn", label: "Aviation & space" },
+    { k: "mar", label: "Marine & specie" },
+    { k: "nrg", label: "Energy" },
+    { k: "prp", label: "Property" },
+    { k: "cas", label: "Casualty & medical" },
+    { k: "pro", label: "PI, D&O & EPL" },
+    { k: "fin", label: "Political, credit & financial" },
+    { k: "ah",  label: "Accident, health & life" },
+    { k: "mot", label: "Motor" },
+    { k: "ri",  label: "Treaty excess of loss" },
+    { k: "ter", label: "Terrorism & war" },
+    { k: "cyb", label: "Cyber" },
+    { k: "spc", label: "Contingency & specialty" }
+  ];
+
+  // [code, class, what it covers]
+  const LIVE = [
+    ["AG", "avn", "Airline business (hull and liability)"],
+    ["AO", "avn", "Aviation premises legal liability, excluding products"],
+    ["AP", "avn", "Aviation or aerospace products legal liability"],
+    ["AW", "avn", "Aircraft hulls: war or confiscation"],
+    ["SC", "avn", "Space risks: launch, commissioning period and transponder operating"],
+    ["SL", "avn", "Space risks: liability, excluding products legal liability"],
+    ["SO", "avn", "Space risks: transponder operating only"],
+
+    ["B",  "mar", "Vessels: total loss only, increased value, loss of hire and containers (excluding war risks only)"],
+    ["T",  "mar", "Vessels: the main hull code, excluding TLO, IV, LOH, containers, shipbuilding and war risks only"],
+    ["O",  "mar", "Yachts, including war (excluding war risks only)"],
+    ["V",  "mar", "Cargo (all risks)"],
+    ["VX", "mar", "Excess of loss treaty: cargo all risks including war, excluding war risks only"],
+    ["WB", "mar", "Vessel hull war: breach voyages only"],
+    ["WX", "mar", "Excess of loss treaty: vessels war and/or confiscation risks only"],
+    ["SA", "mar", "Seafarers abandonment (introduced 2014 for the Maritime Labour Convention)"],
+    ["KP", "mar", "Maritime extortion, excluding kidnap and ransom"],
+    ["FA", "mar", "Fine art"],
+    ["JB", "mar", "Jewellers block, including robbery"],
+    ["GS", "mar", "General specie, including vault risks"],
+    ["CT", "mar", "Armoured carriers and cash in transit"],
+
+    ["EA", "nrg", "Energy liability, onshore: claims made"],
+    ["EB", "nrg", "Energy liability, onshore: all other bases"],
+    ["EC", "nrg", "Energy construction: offshore property and search & production vessels (excluding war risks only)"],
+    ["EF", "nrg", "Energy onshore property"],
+    ["EG", "nrg", "Energy liability, offshore: claims made"],
+    ["EH", "nrg", "Energy liability, offshore: all other bases"],
+    ["EM", "nrg", "Offshore property and search & production vessels with Gulf of Mexico wind exposure (excluding construction and war risks only)"],
+    ["EN", "nrg", "Offshore property and search & production vessels excluding Gulf of Mexico wind (excluding construction and war risks only)"],
+    ["EY", "nrg", "Operators extra expenses and control of well, with Gulf of Mexico wind exposure"],
+    ["EZ", "nrg", "Operators extra expenses and control of well, excluding Gulf of Mexico wind"],
+
+    ["P2", "prp", "Property physical damage, primary layer: USA (excluding binders)"],
+    ["P3", "prp", "Property physical damage, primary layer: excluding USA (excluding binders)"],
+    ["P4", "prp", "Property physical damage, full value: USA (excluding binders)"],
+    ["P5", "prp", "Property physical damage, full value: excluding USA (excluding binders)"],
+    ["P6", "prp", "Property physical damage, excess layer: USA (excluding binders)"],
+    ["P7", "prp", "Property physical damage, excess layer: excluding USA (excluding binders)"],
+    ["B2", "prp", "Property physical damage binder: private property in the USA"],
+    ["B3", "prp", "Property physical damage binder: commercial property in the USA"],
+    ["B4", "prp", "Property physical damage binder: private property excluding USA"],
+    ["B5", "prp", "Property physical damage binder: commercial property excluding USA"],
+    ["HA", "prp", "Crop and forestry (direct, facultative or proportional)"],
+
+    ["GH", "cas", "Medical malpractice: hospitals and institutional healthcare in the USA"],
+    ["GM", "cas", "Medical malpractice: institutional, excluding USA"],
+    ["GN", "cas", "Medical malpractice: nursing homes and long-term care in the USA"],
+    ["GO", "cas", "Medical malpractice: allied and miscellaneous healthcare in the USA (excluding long-term care)"],
+    ["GQ", "cas", "Medical malpractice: individuals, excluding USA"],
+    ["GT", "cas", "Medical malpractice treaty excess of loss: USA"],
+    ["PB", "cas", "Product recall (including all automotive recall)"],
+
+    ["E2", "pro", "Professional indemnity: legal professions, including USA"],
+    ["E3", "pro", "Professional indemnity: legal professions, excluding USA"],
+    ["E4", "pro", "Professional indemnity: accountants, including USA"],
+    ["E5", "pro", "Professional indemnity: accountants, excluding USA"],
+    ["E6", "pro", "Professional indemnity: architects, engineers and other construction-related, including USA"],
+    ["E7", "pro", "Professional indemnity: architects, engineers and other construction-related, excluding USA"],
+    ["E8", "pro", "Miscellaneous professional indemnity (not E2, E4 or E6), including USA"],
+    ["E9", "pro", "Miscellaneous professional indemnity (not E3, E5 or E7), excluding USA"],
+    ["D2", "pro", "Directors & officers (not financial institutions): US public company, Side A/B/C"],
+    ["D3", "pro", "Directors & officers (not financial institutions): non-US public company, Side A/B/C"],
+    ["D4", "pro", "Directors & officers for financial institutions, including USA"],
+    ["D5", "pro", "Directors & officers for financial institutions, excluding USA"],
+    ["D6", "pro", "Employment practices liability (EPLI), including USA"],
+    ["D7", "pro", "Employment practices liability (EPLI), excluding USA"],
+    ["D8", "pro", "Transactional liability, including USA"],
+    ["D9", "pro", "Transactional liability, excluding USA"],
+
+    ["PR", "fin", "Political risks (e.g. confiscation, expropriation, contractors' plant and equipment, force majeure)"],
+    ["CF", "fin", "Contract frustration"],
+    ["CR", "fin", "Credit"],
+    ["FG", "fin", "Financial guarantee (introduced for the 2001 year of account)"],
+    ["FM", "fin", "Mortgage indemnity"],
+    ["BB", "fin", "Fidelity, bankers and computer crime for financial institutions (bankers blanket bond)"],
+
+    ["KA", "ah",  "Personal accident & health carve-out from workers' compensation"],
+    ["KG", "ah",  "General personal accident & health"],
+    ["KL", "ah",  "Personal accident & health catastrophe excess of loss"],
+    ["KS", "ah",  "Sports disability"],
+    ["KT", "ah",  "Travel package schemes"],
+    ["TL", "ah",  "Temporary (term) life and permanent health"],
+
+    ["M2", "mot", "UK motor comprehensive: private car, including motorcycle"],
+    ["M3", "mot", "UK motor comprehensive: fleet and commercial vehicle"],
+    ["M4", "mot", "Other UK motor, comprehensive and non-comprehensive (not M2 or M3)"],
+    ["M5", "mot", "UK motor non-comprehensive: private car, including motorcycle"],
+    ["M6", "mot", "UK motor non-comprehensive: fleet and commercial vehicle"],
+    ["MF", "mot", "Overseas motor damage and third party liability, excluding USA, Canada, EU and EEA"],
+
+    ["XA", "ri",  "Non-marine property / pecuniary loss whole account excess of loss: USA"],
+    ["XR", "ri",  "Non-marine property / pecuniary loss whole account excess of loss: rest of world"],
+    ["XU", "ri",  "Non-marine property / pecuniary loss whole account excess of loss: all of Europe including UK"],
+    ["XJ", "ri",  "Non-marine property / pecuniary loss whole account excess of loss: Japan"],
+    ["XC", "ri",  "Per risk excess of loss: property / pecuniary loss reinsurance"],
+    ["XE", "ri",  "Energy account excess of loss, including war"],
+    ["XF", "ri",  "Non-marine liability excess of loss: USA"],
+    ["XG", "ri",  "Non-marine liability excess of loss: claims made or losses discovered, excluding USA"],
+    ["XH", "ri",  "Non-marine liability excess of loss: losses occurring, excluding USA"],
+    ["XM", "ri",  "Motor whole account excess of loss: original business in the UK"],
+    ["XN", "ri",  "Motor whole account excess of loss: original business outside the UK"],
+    ["XT", "ri",  "Marine whole account excess of loss, including war"],
+    ["XY", "ri",  "Aviation whole account excess of loss including war, excluding XOL on XOL"],
+
+    ["1T", "ter", "Overseas legislation terrorism: accident & health"],
+    ["2T", "ter", "Overseas legislation terrorism: aviation"],
+    ["3T", "ter", "Overseas legislation terrorism: marine"],
+    ["4T", "ter", "Overseas legislation terrorism: miscellaneous & pecuniary loss"],
+    ["5T", "ter", "Overseas legislation terrorism: motor"],
+    ["6T", "ter", "Overseas legislation terrorism: property"],
+    ["7T", "ter", "Overseas legislation terrorism: third party liability"],
+    ["8T", "ter", "Overseas legislation terrorism: transport"],
+    ["1E", "ter", "Overseas legislation terrorism: energy offshore property damage"],
+    ["2E", "ter", "Overseas legislation terrorism: energy offshore liability"],
+    ["3E", "ter", "Overseas legislation terrorism: energy onshore property damage"],
+    ["4E", "ter", "Overseas legislation terrorism: energy onshore liability"],
+    ["TO", "ter", "Overseas stand-alone terrorism (not caught by the 1T to 8T or 1E to 4E codes)"],
+    ["TU", "ter", "UK stand-alone terrorism not reinsured by Pool Re"],
+    ["WL", "ter", "War on land (property physical damage)"],
+
+    ["CY", "cyb", "Cyber: data and privacy breach, with no physical damage"],
+    ["CZ", "cyb", "Cyber: security breach including physical property damage"],
+    ["WY", "cyb", "Affirmative cyber war cover only (new for the 2027 year of account)"],
+
+    ["PC", "spc", "Contingency: event cancellation and abandonment"],
+    ["PN", "spc", "Contingency: non-appearance"],
+    ["PF", "spc", "Contingency: film"],
+    ["PZ", "spc", "Contingency: prize indemnity"],
+    ["WA", "spc", "Extended warranty, including service contracts"],
+    ["NL", "spc", "Nuclear liability"],
+    ["NP", "spc", "Nuclear property damage"]
+  ];
+
+  // [code, class, what it covered, year retired, replaced by]
+  const RETIRED = [
+    ["AR", "avn", "Aviation whole account stop loss and/or aggregate excess of loss", "2005", ["XY"]],
+    ["AX", "avn", "Aviation liability excess of loss", "2005", ["XY"]],
+    ["XZ", "ri",  "Aviation excess of loss including XOL on XOL and war", "2005", null],
+    ["XX", "ri",  "Non-marine property / pecuniary loss LMX", "2005", null],
+    ["XL", "ri",  "Non-marine liability excess of loss", "2010", ["XF", "XG"]],
+    ["XP", "ri",  "Non-marine property / pecuniary loss whole account excess of loss", "2008", ["XA", "XU", "XJ", "XR"]],
+    ["ET", "nrg", "Offshore property and search & production vessels (not split by Gulf of Mexico wind)", "2011", ["EM", "EN"]],
+    ["EW", "nrg", "Operators extra expenses and control of well (not split by Gulf of Mexico wind)", "2011", ["EY", "EZ"]],
+    ["M7", "mot", "Other UK motor non-comprehensive (not M5 or M6)", "2008", ["M4"]],
+    ["MA", "mot", "UK motor vehicle physical damage only", "2005", ["M2", "M3", "M4"]],
+    ["KK", "ah",  "Personal accident and health", "2005", ["KG", "KS", "KT"]],
+    ["CN", "fin", "Credit: non-proportional treaty business", "2005", ["CR"]],
+    ["BS", "fin", "Mortgage indemnity: UK private", "2005", ["FM"]]
+  ];
+
+  const TIPS = [
+    { codes: ["E2","E3","E4","E5","E6","E7","E8","E9","D2","D3","D4","D5","D6","D7","D8","D9","P2","P3","P4","P5","P6","P7"],
+      text: "Even and odd: in the E, D and P2–P7 series the even number is the USA version and the odd number excludes the USA." },
+    { codes: ["D2","D3","D4","D5","D6","D7","D8","D9"],
+      text: "US or non-US is decided by whether the insured has shares traded on a US exchange (NYSE, NASDAQ, or an ADR programme at level II or III)." },
+    { codes: ["P2","P3","P4","P5","P6","P7"],
+      text: "P2–P7 run in pairs by layer: primary (P2/P3), full value (P4/P5), then excess (P6/P7)." },
+    { codes: ["B2","B3","B4","B5","P2","P3","P4","P5","P6","P7"],
+      text: "Binders use B2–B5 (personal lines and SME property). Larger open-market risks on subscription use P2–P7." },
+    { codes: ["B2","B3","B4","B5"],
+      text: "B2 and B3 are the USA (private, then commercial). B4 and B5 are the same split outside the USA." },
+    { codes: ["M2","M3","M4","M5","M6","M7","MA"],
+      text: "UK motor: M2/M3 comprehensive, M5/M6 non-comprehensive, private car before fleet. M4 is the catch-all for other UK motor." },
+    { codes: ["EM","EN","EY","EZ","ET","EW"],
+      text: "Gulf of Mexico wind: EM and EY carry it, EN and EZ exclude it. The pairs replaced ET and EW in 2011." },
+    { codes: ["EA","EB","EG","EH"],
+      text: "Energy liability: EA/EB onshore, EG/EH offshore. The first of each pair is claims made; the second is everything else." },
+    { codes: ["XA","XR","XU","XJ","XP"],
+      text: "Property whole account XOL by territory: XA America, XU UK and Europe, XJ Japan, XR rest of world. They replaced XP in 2008." },
+    { codes: ["XF","XG","XH","XL"],
+      text: "Liability XOL: XF is the USA. Outside the USA, XG is claims made or losses discovered and XH is losses occurring. XL was retired in 2010." },
+    { codes: ["XM","XN"],
+      text: "Motor whole account XOL: XM for UK original business, XN for non-UK." },
+    { codes: ["CY","CZ","WY"],
+      text: "CY has no physical damage; CZ (added in 2015) includes it. WY is for affirmative cyber war cover from the 2027 year of account." },
+    { codes: ["1T","2T","3T","4T","5T","6T","7T","8T","1E","2E","3E","4E"],
+      text: "Overseas legislation terrorism codes are never used alone. They sit alongside the normal risk code for the class." },
+    { codes: ["TO","TU","1T","2T","3T","4T","5T","6T","7T","8T"],
+      text: "Stand-alone terrorism: TU is UK business outside Pool Re; TO is overseas business not caught by the overseas legislation codes." },
+    { codes: ["AR","AX","XY","XZ"],
+      text: "Aviation excess of loss was consolidated into XY from 1 January 2005." },
+    { codes: ["GH","GM","GN","GO","GQ","GT"],
+      text: "Medical malpractice split into the G codes in 2008. GN was split again for 2021, with allied healthcare moving to GO." },
+    { codes: ["B","T","O","V","VX","WB","EC","EM","EN"],
+      text: "WRO means war risks only. Stand-alone war is coded separately from hull, yachts, cargo and energy." },
+    { codes: ["PC","PN","PF","PZ"],
+      text: "Contingency: PC cancellation and abandonment, PN non-appearance, PF film, PZ prize indemnity." }
+  ];
+
+  const MODES = {
+    stamp:   "Stamp the correct risk code",
+    read:    "Which risk does this code cover?",
+    type:    "Type the risk code from memory",
+    retired: "This code is retired. What replaced it?"
+  };
+
+  // ---------- Helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  const shuffle = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const norm = (s) => String(s || "").trim().toUpperCase().replace(/\s+/g, "");
+  const fmt = (n) => Number(n).toLocaleString("en-GB");
+  const lowerFirst = (s) => (/^[A-Z][a-z]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+  const bellSvg = '<svg aria-hidden="true"><use href="#bell"></use></svg>';
+
+  const store = {
+    get(key, fallback) { try { const v = localStorage.getItem(key); return v == null ? fallback : JSON.parse(v); } catch (e) { return fallback; } },
+    set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage unavailable */ } },
+    del(key) { try { localStorage.removeItem(key); } catch (e) { /* storage unavailable */ } }
+  };
+
+  function builtinDeck() {
+    const codes = LIVE.map(([c, k, d]) => ({ c, k, d, r: false }))
+      .concat(RETIRED.map(([c, k, d, y, repl]) => ({ c, k, d, r: true, y, repl })));
+    return { source: "builtin", name: "Built-in deck", classes: CLASSES.map((x) => ({ ...x })), codes };
+  }
+  function validDeck(d) { return d && Array.isArray(d.codes) && Array.isArray(d.classes) && d.codes.length >= 4; }
+
+  // ---------- State ----------
+  let deck = store.get("rcg.deck", null);
+  if (!validDeck(deck)) deck = builtinDeck();
+  let byCode = new Map();
+  let classLabel = {};
+  function indexDeck() {
+    byCode = new Map(deck.codes.map((e) => [e.c, e]));
+    classLabel = Object.fromEntries(deck.classes.map((c) => [c.k, c.label]));
+  }
+  indexDeck();
+
+  const settings = Object.assign({ mode: "mixed", len: 10, classes: null, sound: false }, store.get("rcg.settings", {}));
+  let mastery = store.get("rcg.mastery", {});
+  let best = Number(store.get("rcg.best", 0)) || 0;
+  let game = null;
+
+  const saveSettings = () => store.set("rcg.settings", settings);
+  const activeClasses = () => (Array.isArray(settings.classes) && settings.classes.length ? settings.classes : null);
+  const replStr = (e) => (e.repl || []).join(" / ");
+
+  // ---------- Game building ----------
+  function livePool(classes) { return deck.codes.filter((e) => !e.r && (!classes || classes.includes(e.k))); }
+  function retiredPool(classes) { return deck.codes.filter((e) => e.r && e.repl && e.repl.length && (!classes || classes.includes(e.k))); }
+
+  function distractors(e, n) {
+    const pool = deck.codes.filter((x) => !x.r && x.c !== e.c && x.d !== e.d);
+    const same = shuffle(pool.filter((x) => x.k === e.k));
+    const other = shuffle(pool.filter((x) => x.k !== e.k));
+    return same.slice(0, n).concat(other).slice(0, n);
+  }
+
+  function makeQ(e, type) {
+    if (type === "retired") {
+      const right = replStr(e);
+      const wrong = new Set();
+      shuffle(deck.codes.filter((x) => x.r && x.repl && x.repl.length && replStr(x) !== right)).forEach((x) => { if (wrong.size < 3) wrong.add(replStr(x)); });
+      const fill = shuffle(deck.codes.filter((x) => !x.r && !e.repl.includes(x.c)));
+      for (let i = 0; wrong.size < 3 && i < fill.length; i++) {
+        const cand = e.repl.length > 1 && fill[i + 1] ? fill[i].c + " / " + fill[i + 1].c : fill[i].c;
+        if (cand !== right) wrong.add(cand);
+      }
+      return { type, c: e.c, answer: right, options: shuffle([right, ...wrong]) };
+    }
+    if (type === "type") return { type, c: e.c, answer: e.c, options: [] };
+    const opts = shuffle([e, ...distractors(e, 3)]).map((x) => x.c);
+    return { type, c: e.c, answer: e.c, options: opts };
+  }
+
+  function pickType() {
+    const r = Math.random();
+    return r < 0.45 ? "stamp" : r < 0.8 ? "read" : "type";
+  }
+
+  function newGame(onlyCodes) {
+    const classes = activeClasses();
+    const len = Number(settings.len) || 10;
+    let qs = [];
+    if (onlyCodes && onlyCodes.length) {
+      qs = shuffle(onlyCodes.map((c) => byCode.get(c)).filter(Boolean)).map((e) =>
+        e.r ? (e.repl && e.repl.length ? makeQ(e, "retired") : null) : makeQ(e, settings.mode === "mixed" || settings.mode === "retired" ? pickType() : settings.mode)
+      ).filter(Boolean);
+    } else if (settings.mode === "retired") {
+      let pool = retiredPool(classes);
+      if (!pool.length) pool = retiredPool(null);
+      qs = shuffle(pool).slice(0, len).map((e) => makeQ(e, "retired"));
+    } else {
+      let live = livePool(classes);
+      if (!live.length) live = livePool(null);
+      let retired = [];
+      if (settings.mode === "mixed") {
+        const rp = shuffle(retiredPool(classes));
+        retired = rp.slice(0, Math.min(rp.length, Math.round(len * 0.1)));
+      }
+      const picked = shuffle(live).slice(0, Math.max(0, len - retired.length));
+      qs = shuffle(
+        picked.map((e) => makeQ(e, settings.mode === "mixed" ? pickType() : settings.mode))
+          .concat(retired.map((e) => makeQ(e, "retired")))
+      );
+    }
+    if (!qs.length) qs = shuffle(livePool(null)).slice(0, len).map((e) => makeQ(e, "stamp"));
+    game = { qs, i: 0, score: 0, streak: 0, bestStreak: 0, answered: false, done: false, ref: 2600 + Math.floor(Math.random() * 90) };
+  }
+
+  // ---------- Play ----------
+  function answer(given) {
+    if (!game || game.answered || game.done) return;
+    const q = game.qs[game.i];
+    const correct = norm(given) === norm(q.answer);
+    let pts = 0;
+    if (correct) {
+      pts = (q.type === "type" ? 150 : 100) + Math.min(game.streak, 5) * 20;
+      game.streak += 1;
+      game.bestStreak = Math.max(game.bestStreak, game.streak);
+      game.score += pts;
+    } else {
+      game.streak = 0;
+      ring(1);
+    }
+    q.given = String(given || "").trim().toUpperCase() || "—";
+    q.correct = correct;
+    q.pts = pts;
+    game.answered = true;
+    const m = mastery[q.c] || [0, 0];
+    m[correct ? 0 : 1] += 1;
+    mastery[q.c] = m;
+    store.set("rcg.mastery", mastery);
+    renderPlay(true);
+    // Defer so the Enter/number key that answered cannot also activate the new button.
+    setTimeout(() => { const nb = $("nextBtn"); if (nb) nb.focus({ preventScroll: true }); }, 0);
+  }
+
+  function next() {
+    if (!game || !game.answered) return;
+    game.i += 1;
+    game.answered = false;
+    if (game.i >= game.qs.length) {
+      game.done = true;
+      const acc = game.qs.filter((q) => q.correct).length / game.qs.length;
+      if (game.score > best) { best = game.score; store.set("rcg.best", best); }
+      ring(acc >= 0.7 ? 2 : acc < 0.5 ? 1 : 0);
+    }
+    renderPlay(false);
+    setTimeout(focusFirst, 0);
+  }
+
+  function focusFirst() {
+    const t = $("typedInput") || document.querySelector("#rack .opt") || $("replayBtn") || $("againBtn");
+    if (t) t.focus({ preventScroll: true });
+  }
+
+  // ---------- Bell ----------
+  let actx = null;
+  function ring(times) {
+    if (!settings.sound || !times) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = actx.currentTime + 0.02;
+      for (let i = 0; i < times; i++) strike(t0 + i * 0.95);
+    } catch (e) { /* audio unavailable */ }
+  }
+  function strike(t) {
+    const out = actx.createGain();
+    out.connect(actx.destination);
+    out.gain.setValueAtTime(0.0001, t);
+    out.gain.exponentialRampToValueAtTime(0.28, t + 0.012);
+    out.gain.exponentialRampToValueAtTime(0.0001, t + 2.4);
+    [[1, 0.55], [2.76, 0.22], [5.4, 0.1], [8.93, 0.05]].forEach(([mult, amp]) => {
+      const o = actx.createOscillator();
+      const g = actx.createGain();
+      o.type = "sine";
+      o.frequency.value = 330 * mult;
+      g.gain.value = amp;
+      o.connect(g).connect(out);
+      o.start(t);
+      o.stop(t + 2.5);
+    });
+  }
+
+  // ---------- Rendering: play ----------
+  function renderScore() {
+    $("sScore").textContent = fmt(game.score);
+    $("sStreak").innerHTML = bellSvg + '<span>' + game.streak + '</span>';
+    $("sBest").textContent = fmt(Math.max(best, game.score));
+    $("marks").innerHTML = game.qs.map((q, i) => {
+      const done = i < game.i || (i === game.i && game.answered);
+      const cls = done ? (q.correct ? "ok" : "bad") : i === game.i && !game.done ? "now" : "";
+      const label = done ? (q.correct ? "correct" : "missed") : i === game.i ? "current" : "to come";
+      return '<li class="' + cls + '" title="Slip ' + (i + 1) + ': ' + label + '"></li>';
+    }).join("");
+  }
+
+  function impressionHtml(code, cls, label, animate) {
+    return '<div class="impression ' + cls + (animate ? " land" : "") + '"><span class="ic">' + esc(code) + '</span><span class="il">' + esc(label) + '</span></div>';
+  }
+
+  function renderPlay(justAnswered) {
+    renderScore();
+    const slip = $("slip");
+    const rack = $("rack");
+    const fb = $("feedback");
+
+    if (game.done) {
+      slip.innerHTML = endHtml();
+      rack.innerHTML = "";
+      fb.innerHTML = "";
+      const rb = $("replayBtn");
+      if (rb) rb.addEventListener("click", () => { newGame(game.qs.filter((q) => !q.correct).map((q) => q.c)); renderPlay(false); focusFirst(); });
+      $("againBtn").addEventListener("click", () => { newGame(); renderPlay(false); focusFirst(); });
+      return;
+    }
+
+    const q = game.qs[game.i];
+    const e = byCode.get(q.c) || { c: q.c, d: "", k: "" };
+    const n = game.qs.length;
+    const umr = "UMR B0000RCG" + game.ref + String(game.i + 1).padStart(2, "0");
+
+    let riskHtml;
+    let riskCls = "risk";
+    if (q.type === "read") { riskHtml = game.answered ? esc(e.d) : "?"; if (!game.answered) riskCls += " muted"; }
+    else if (q.type === "retired") riskHtml = esc(e.d);
+    else riskHtml = esc(e.d);
+
+    let box;
+    if (q.type === "read") {
+      box = game.answered ? impressionHtml(e.c, q.correct ? "ok" : "bad", q.correct ? "Written" : "Declined", justAnswered) : impressionHtml(e.c, "", "On slip", false);
+    } else if (q.type === "retired") {
+      box = impressionHtml(e.c, "void", "Retired " + (e.y || ""), false);
+    } else if (game.answered) {
+      box = impressionHtml(q.given, q.correct ? "ok" : "bad", q.correct ? "Written" : "Declined", justAnswered);
+    } else {
+      box = '<span class="blank" aria-hidden="true">??</span>';
+    }
+
+    const classText = game.answered || q.type === "retired" ? esc(classLabel[e.k] || "Other") : "Shown once stamped";
+    const keyHint = q.type === "type"
+      ? 'Type the code and press <kbd>Enter</kbd>.'
+      : game.answered ? 'Press <kbd>Enter</kbd> for the next slip.' : 'Press <kbd>1</kbd>–<kbd>' + Math.max(q.options.length, 1) + '</kbd> to choose.';
+
+    slip.innerHTML =
+      '<div class="slip-head"><span class="slip-no">Slip ' + (game.i + 1) + ' of ' + n + '</span><span class="umr">' + umr + '</span></div>' +
+      '<dl class="fields">' +
+        '<div class="field"><dt>Task</dt><dd>' + esc(MODES[q.type]) + '</dd></div>' +
+        '<div class="field"><dt>Class</dt><dd class="' + (game.answered || q.type === "retired" ? "" : "muted") + '">' + classText + '</dd></div>' +
+        '<div class="field"><dt>' + (q.type === "retired" ? "Covered" : "Risk") + '</dt><dd class="' + riskCls + '">' + riskHtml + '</dd></div>' +
+      '</dl>' +
+      '<div class="slip-foot"><div class="codebox"><span class="codebox-label">Risk code</span>' + box + '</div><p class="foot-note">' + keyHint + '</p></div>';
+
+    // Options rack
+    if (q.type === "type") {
+      rack.innerHTML = game.answered ? "" :
+        '<form class="typed-form" id="typedForm" autocomplete="off">' +
+          '<label class="sr-only" for="typedInput">Risk code</label>' +
+          '<input id="typedInput" maxlength="2" spellcheck="false" autocapitalize="characters" placeholder="··" aria-describedby="typedHelp">' +
+          '<button class="btn" type="submit">Stamp it</button>' +
+          '<button class="btn ghost" type="button" id="passBtn">Pass</button>' +
+          '<span class="sr-only" id="typedHelp">Enter one or two characters</span>' +
+        '</form>';
+      if (!game.answered) {
+        $("typedForm").addEventListener("submit", (ev) => { ev.preventDefault(); const v = $("typedInput").value; if (v.trim()) answer(v); else $("typedInput").focus(); });
+        $("passBtn").addEventListener("click", () => answer(""));
+      }
+    } else {
+      const codesStyle = q.type === "stamp" || q.type === "retired";
+      rack.className = "rack" + (codesStyle ? " rack-codes" : "");
+      rack.innerHTML = q.options.map((opt, idx) => {
+        let state = "";
+        if (game.answered) {
+          if (norm(opt) === norm(q.answer)) state = " is-right";
+          else if (norm(opt) === norm(q.given)) state = " is-wrong";
+          else state = " is-dim";
+        }
+        if (codesStyle) {
+          const big = opt.length <= 2;
+          return '<button type="button" class="opt opt-code' + state + '" data-v="' + esc(opt) + '"' + (game.answered ? " disabled" : "") + ' aria-label="Option ' + (idx + 1) + ': ' + esc(opt) + '">' +
+            '<span class="key">' + (idx + 1) + '</span><span class="' + (big ? "big" : "small") + '">' + esc(opt) + '</span></button>';
+        }
+        const oe = byCode.get(opt);
+        return '<button type="button" class="opt opt-desc' + state + '" data-v="' + esc(opt) + '"' + (game.answered ? " disabled" : "") + '>' +
+          '<span class="key">' + (idx + 1) + '</span>' + esc(oe ? oe.d : opt) + '</button>';
+      }).join("");
+      rack.querySelectorAll(".opt").forEach((b) => b.addEventListener("click", () => answer(b.dataset.v)));
+    }
+    if (q.type === "type") rack.className = "rack";
+
+    // Feedback
+    fb.innerHTML = game.answered ? feedbackHtml(q, e) : "";
+    const nb = $("nextBtn");
+    if (nb) nb.addEventListener("click", next);
+  }
+
+  function tipsFor(code) { return TIPS.filter((t) => t.codes.includes(code)).map((t) => t.text); }
+
+  function feedbackHtml(q, e) {
+    const last = game.i === game.qs.length - 1;
+    let html = '<div class="feedback">';
+    html += '<div class="verdict ' + (q.correct ? "ok" : "bad") + '">' + (q.correct ? "Written" : "Declined") +
+      '<span class="pts">' + (q.correct ? "+" + q.pts + " points" + (game.streak > 1 ? " · streak of " + game.streak : "") : "The Lutine Bell rings once") + '</span></div>';
+
+    if (q.type === "retired") {
+      html += '<p class="answer-line"><span class="chip muted">' + esc(e.c) + '</span><span>Retired from 1 January ' + esc(e.y) + '. Replaced by <b>' + esc(q.answer) + '</b>.</span></p>';
+      (e.repl || []).forEach((c) => { const r = byCode.get(c); if (r) html += '<p class="answer-line"><span class="chip ok">' + esc(c) + '</span><span>' + esc(r.d) + '</span></p>'; });
+    } else {
+      html += '<p class="answer-line"><span class="chip ok">' + esc(e.c) + '</span><span>' + esc(e.d) + '</span></p>';
+      if (!q.correct) {
+        const g = byCode.get(q.given);
+        if (q.type === "read" && g) html += '<p class="answer-line given"><span class="chip bad">' + esc(g.c) + '</span><span>You chose ' + esc(lowerFirst(g.d)) + '. That is ' + esc(g.c) + '.</span></p>';
+        else if (g) html += '<p class="answer-line given"><span class="chip bad">' + esc(g.c) + '</span><span>You stamped ' + esc(g.c) + ', which is ' + esc(lowerFirst(g.d)) + '.</span></p>';
+        else if (q.given && q.given !== "—") html += '<p class="answer-line given"><span class="chip bad">' + esc(q.given) + '</span><span>' + (q.type === "type" ? "Not a code in this deck." : "") + '</span></p>';
+      }
+    }
+    const tips = tipsFor(e.c);
+    if (tips.length) html += '<ul class="tips">' + tips.map((t) => "<li>" + esc(t) + "</li>").join("") + "</ul>";
+    html += '<div class="feedback-actions"><button class="btn" type="button" id="nextBtn">' + (last ? "Close the account" : "Next slip") + '</button></div>';
+    return html + "</div>";
+  }
+
+  function endHtml() {
+    const n = game.qs.length;
+    const right = game.qs.filter((q) => q.correct).length;
+    const acc = n ? right / n : 0;
+    const bell = acc >= 0.7
+      ? "The Lutine Bell rings twice: good news. You coded " + right + " of " + n + " slips correctly."
+      : acc < 0.5
+        ? "The Lutine Bell rings once. " + right + " of " + n + " slips coded correctly. Try the code book, then replay the ones you missed."
+        : right + " of " + n + " slips coded correctly. No bell this time. Two more right would have rung it twice.";
+
+    const byCls = {};
+    game.qs.forEach((q) => {
+      const e = byCode.get(q.c);
+      const k = e ? e.k : "oth";
+      byCls[k] = byCls[k] || [0, 0];
+      byCls[k][1] += 1;
+      if (q.correct) byCls[k][0] += 1;
+    });
+    const rows = Object.entries(byCls).sort((a, b) => b[1][1] - a[1][1]).map(([k, [r, t]]) =>
+      '<li class="class-row"><span>' + esc(classLabel[k] || "Other") + '</span><span class="bar"><span style="width:' + Math.round((r / t) * 100) + '%"></span></span><span class="n">' + r + '/' + t + '</span></li>'
+    ).join("");
+
+    const missed = game.qs.filter((q) => !q.correct);
+    const missedHtml = missed.length
+      ? '<div><h3 class="sub">Slips to revise</h3><ul class="missed">' + missed.map((q) => {
+          const e = byCode.get(q.c) || { c: q.c, d: "" };
+          const extra = q.type === "retired" ? " (retired " + (e.y || "") + ", replaced by " + replStr(e) + ")" : "";
+          return '<li><span class="chip">' + esc(e.c) + '</span><span>' + esc(e.d + extra) + '</span></li>';
+        }).join("") + "</ul></div>"
+      : "<p>Clean sheet. Every slip coded correctly.</p>";
+
+    return '<div class="slip-head"><span class="slip-no">Account closed</span><span class="umr">' + n + ' slips</span></div>' +
+      '<div class="endcard">' +
+        '<h2>' + (acc >= 0.9 ? "Top of the Room" : acc >= 0.7 ? "A solid book" : acc >= 0.5 ? "Room to improve" : "Back to the code book") + '</h2>' +
+        '<p class="bell-line">' + bellSvg + '<span>' + esc(bell) + '</span></p>' +
+        '<div class="end-stats">' +
+          '<div class="stat"><span class="stat-label">Score</span><span class="stat-val">' + fmt(game.score) + '</span></div>' +
+          '<div class="stat"><span class="stat-label">Accuracy</span><span class="stat-val">' + Math.round(acc * 100) + '%</span></div>' +
+          '<div class="stat"><span class="stat-label">Longest streak</span><span class="stat-val">' + game.bestStreak + '</span></div>' +
+          '<div class="stat"><span class="stat-label">Best game</span><span class="stat-val">' + fmt(best) + '</span></div>' +
+        '</div>' +
+        '<div><h3 class="sub">By class</h3><ul class="class-rows">' + rows + '</ul></div>' +
+        missedHtml +
+        '<div class="feedback-actions">' +
+          (missed.length ? '<button class="btn" type="button" id="replayBtn">Replay the ' + missed.length + ' missed</button>' : "") +
+          '<button class="btn' + (missed.length ? " ghost" : "") + '" type="button" id="againBtn">Start a new game</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  // ---------- Settings panel ----------
+  function renderSettings() {
+    document.querySelectorAll('input[name="mode"]').forEach((r) => { r.checked = r.value === settings.mode; });
+    document.querySelectorAll('input[name="len"]').forEach((r) => { r.checked = Number(r.value) === Number(settings.len); });
+    $("sound").checked = !!settings.sound;
+    const act = activeClasses();
+    const counts = {};
+    deck.codes.forEach((e) => { if (!e.r) counts[e.k] = (counts[e.k] || 0) + 1; });
+    $("classChips").innerHTML = deck.classes.filter((c) => counts[c.k]).map((c) =>
+      '<label class="chipbox"><input type="checkbox" id="cls-' + esc(c.k) + '" value="' + esc(c.k) + '"' + (!act || act.includes(c.k) ? " checked" : "") + '><span>' + esc(c.label) + ' · ' + counts[c.k] + '</span></label>'
+    ).join("");
+    $("classChips").querySelectorAll("input").forEach((i) => i.addEventListener("change", readClasses));
+    const live = deck.codes.filter((e) => !e.r).length;
+    const ret = deck.codes.length - live;
+    const info = '<b>' + esc(deck.name) + '</b>: ' + live + ' live codes and ' + ret + ' retired.' + (deck.source === "import" ? " Loaded from your spreadsheet." : "");
+    $("deckInfo").innerHTML = info;
+    $("deckInfo2").innerHTML = "Now playing with the " + info;
+  }
+  function readClasses() {
+    const boxes = [...$("classChips").querySelectorAll("input")];
+    const on = boxes.filter((b) => b.checked).map((b) => b.value);
+    settings.classes = on.length === boxes.length ? null : on;
+    saveSettings();
+  }
+
+  $("settingsForm").addEventListener("change", (ev) => {
+    const t = ev.target;
+    if (t.name === "mode") settings.mode = t.value;
+    if (t.name === "len") settings.len = Number(t.value);
+    if (t.id === "sound") settings.sound = t.checked;
+    saveSettings();
+  });
+  $("settingsForm").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    readClasses();
+    if (settings.classes && !settings.classes.length) settings.classes = null;
+    newGame();
+    renderPlay(false);
+    focusFirst();
+    $("slip").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+  });
+  $("clsAll").addEventListener("click", () => { $("classChips").querySelectorAll("input").forEach((i) => { i.checked = true; }); readClasses(); });
+  $("clsNone").addEventListener("click", () => { $("classChips").querySelectorAll("input").forEach((i) => { i.checked = false; }); readClasses(); });
+
+  // ---------- Code book ----------
+  let cbClass = "all";
+  function renderBook() {
+    const counts = {};
+    deck.codes.forEach((e) => { counts[e.k] = (counts[e.k] || 0) + 1; });
+    $("cbClasses").innerHTML = [{ k: "all", label: "All classes" }].concat(deck.classes.filter((c) => counts[c.k])).map((c) =>
+      '<label class="chipbox"><input type="radio" name="cbcls" id="cb-' + esc(c.k) + '" value="' + esc(c.k) + '"' + (cbClass === c.k ? " checked" : "") + '><span>' + esc(c.label) + '</span></label>'
+    ).join("");
+    $("cbClasses").querySelectorAll("input").forEach((i) => i.addEventListener("change", () => { cbClass = i.value; renderRows(); }));
+    $("patternList").innerHTML = TIPS.filter((t) => t.codes.some((c) => byCode.has(c))).map((t) => "<li>" + esc(t.text) + "</li>").join("");
+    renderRows();
+  }
+  function renderRows() {
+    const qRaw = $("cbSearch").value.trim();
+    const q = qRaw.toLowerCase();
+    const showRet = $("cbRetired").checked;
+    const order = Object.fromEntries(deck.classes.map((c, i) => [c.k, i]));
+    const rows = deck.codes
+      .filter((e) => (cbClass === "all" || e.k === cbClass) && (showRet || !e.r))
+      .filter((e) => !q || e.c.toLowerCase() === q || e.d.toLowerCase().includes(q) || (classLabel[e.k] || "").toLowerCase().includes(q) || (q.length <= 2 && e.c.toLowerCase().startsWith(q)))
+      .sort((a, b) => (order[a.k] ?? 99) - (order[b.k] ?? 99) || (a.r - b.r) || a.c.localeCompare(b.c, "en", { numeric: true }));
+    $("cbBody").innerHTML = rows.map((e) => {
+      const m = mastery[e.c];
+      const rec = m ? m[0] + " of " + (m[0] + m[1]) : "Not played";
+      const status = e.r
+        ? '<span class="pill ret">Retired ' + esc(e.y || "") + '</span>' + (e.repl && e.repl.length ? ' → ' + esc(replStr(e)) : "")
+        : '<span class="pill">Live</span>';
+      return '<tr class="' + (e.r ? "retired" : "") + '"><td class="code"><span class="chip' + (e.r ? " muted" : "") + '">' + esc(e.c) + '</span></td><td class="desc">' + esc(e.d) + '</td><td class="cls">' + esc(classLabel[e.k] || "Other") + '</td><td class="status">' + status + '</td><td class="score">' + rec + '</td></tr>';
+    }).join("") || '<tr><td colspan="5">No codes match “' + esc(qRaw) + '”.</td></tr>';
+    $("cbCount").textContent = "Showing " + rows.length + " of " + deck.codes.length + " codes.";
+  }
+  $("cbSearch").addEventListener("input", renderRows);
+  $("cbRetired").addEventListener("change", renderRows);
+
+  // ---------- Import ----------
+  function msg(text, kind) { const m = $("importMsg"); m.textContent = text; m.className = "msg" + (kind ? " " + kind : ""); }
+
+  function loadXLSX() {
+    if (window.XLSX) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error("The spreadsheet reader could not load. Check your connection and try again."));
+      document.head.appendChild(s);
+    });
+  }
+
+  function parseRows(rows) {
+    for (let h = 0; h < Math.min(rows.length, 30); h++) {
+      const cells = (rows[h] || []).map((v) => String(v).trim().toLowerCase());
+      let ci = cells.findIndex((v) => /^risk\s*codes?$/.test(v));
+      if (ci < 0) ci = cells.findIndex((v) => /code/.test(v) && !/desc/.test(v));
+      let di = cells.findIndex((v) => /desc/.test(v));
+      if (ci < 0 || di < 0) continue;
+      const gi = cells.findIndex((v, i) => i !== ci && i !== di && /(class|group|category|line of business|lob|market)/.test(v));
+      const si = cells.findIndex((v, i) => i !== ci && i !== di && /(status|retired|active|valid|end)/.test(v));
+      const out = [];
+      const seen = new Set();
+      for (let r = h + 1; r < rows.length; r++) {
+        const row = rows[r] || [];
+        const code = String(row[ci] == null ? "" : row[ci]).trim().toUpperCase();
+        const rawDesc = String(row[di] == null ? "" : row[di]).replace(/\s+/g, " ").trim();
+        if (!/^[A-Z0-9]{1,2}$/.test(code) || !rawDesc || seen.has(code)) continue;
+        seen.add(code);
+        const status = si >= 0 ? String(row[si] == null ? "" : row[si]).toLowerCase() : "";
+        const retiredText = /retired/i.test(rawDesc);
+        const retired = retiredText || /retired|closed|inactive|obsolete/.test(status);
+        const clause = (rawDesc.match(/risk code (?:being )?retired.*$/i) || [""])[0] + " " + status;
+        const repl = [];
+        const after = clause.split(/use risk codes?/i)[1] || "";
+        (after.match(/["“”'‘’]([A-Z0-9]{1,2})["“”'‘’]/g) || []).forEach((m) => { const c = m.replace(/[^A-Z0-9]/g, ""); if (!repl.includes(c)) repl.push(c); });
+        const yr = (clause.match(/\d{1,2}\/\d{1,2}\/(\d{2,4})/) || [])[1];
+        const y = yr ? (yr.length === 2 ? "20" + yr : yr) : "";
+        const d = rawDesc.replace(/\s*[-–:;,(]*\s*risk code (?:being )?retired.*$/i, "").trim() || rawDesc;
+        out.push({ c: code, d, g: gi >= 0 ? String(row[gi] == null ? "" : row[gi]).trim() : "", r: retired, y, repl });
+      }
+      if (out.length >= 10) return out;
+    }
+    return null;
+  }
+
+  function buildImportedDeck(rows, fileName) {
+    const known = new Map(builtinDeck().codes.map((e) => [e.c, e.k]));
+    const groups = [...new Set(rows.map((r) => r.g).filter(Boolean))];
+    const useGroups = groups.length >= 2 && groups.length <= 30;
+    let classes;
+    let keyOf;
+    if (useGroups) {
+      classes = groups.map((g, i) => ({ k: "g" + i, label: g }));
+      const m = new Map(groups.map((g, i) => [g, "g" + i]));
+      keyOf = (r) => m.get(r.g) || "oth";
+    } else {
+      classes = CLASSES.map((x) => ({ ...x }));
+      keyOf = (r) => known.get(r.c) || "oth";
+    }
+    classes.push({ k: "oth", label: "Other" });
+    const codes = rows.map((r) => ({ c: r.c, d: r.d, k: keyOf(r), r: r.r, y: r.y, repl: r.repl.length ? r.repl : null }));
+    return { source: "import", name: fileName.replace(/\.[^.]+$/, ""), classes, codes };
+  }
+
+  $("importFile").addEventListener("change", async (ev) => {
+    const file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    msg("Reading " + file.name + "…");
+    try {
+      await loadXLSX();
+      const buf = await file.arrayBuffer();
+      const wb = window.XLSX.read(buf, { type: "array" });
+      let best = null;
+      wb.SheetNames.forEach((name) => {
+        const rows = window.XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: false, defval: "" });
+        const parsed = parseRows(rows);
+        if (parsed && (!best || parsed.length > best.length)) best = parsed;
+      });
+      if (!best) throw new Error("No sheet had a “Risk code” column and a “Description” column with at least 10 codes. Check you picked the Lloyd's risk codes spreadsheet.");
+      const next = buildImportedDeck(best, file.name);
+      if (next.codes.filter((e) => !e.r).length < 4) throw new Error("The file has fewer than four live codes, which is not enough to play.");
+      deck = next;
+      indexDeck();
+      store.set("rcg.deck", deck);
+      settings.classes = null;
+      saveSettings();
+      newGame();
+      renderAll();
+      const live = deck.codes.filter((e) => !e.r).length;
+      msg("Loaded " + live + " live and " + (deck.codes.length - live) + " retired codes from " + file.name + ". A new game has started with them.", "ok");
+    } catch (err) {
+      msg(err && err.message ? err.message : "That file could not be read.", "bad");
+    } finally {
+      ev.target.value = "";
+    }
+  });
+  $("resetDeck").addEventListener("click", () => {
+    deck = builtinDeck();
+    indexDeck();
+    store.del("rcg.deck");
+    settings.classes = null;
+    saveSettings();
+    newGame();
+    renderAll();
+    msg("Back on the built-in deck. A new game has started.", "ok");
+  });
+
+  // ---------- Tabs ----------
+  const TABS = ["play", "codebook", "import"];
+  function showTab(id, focus) {
+    if (!TABS.includes(id)) id = "play";
+    TABS.forEach((t) => {
+      $(t).hidden = t !== id;
+      $("tab-" + t).setAttribute("aria-selected", String(t === id));
+      $("tab-" + t).tabIndex = t === id ? 0 : -1;
+    });
+    if (id === "codebook") renderBook();
+    if (focus) $("tab-" + id).focus();
+  }
+  TABS.forEach((t) => $("tab-" + t).addEventListener("click", () => {
+    showTab(t);
+    try { history.replaceState(null, "", "#" + t); } catch (e) { /* ignore */ }
+  }));
+  document.querySelector(".tabs").addEventListener("keydown", (ev) => {
+    if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft") return;
+    const cur = TABS.findIndex((t) => $("tab-" + t).getAttribute("aria-selected") === "true");
+    const nxt = TABS[(cur + (ev.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length];
+    showTab(nxt, true);
+  });
+
+  // ---------- Keyboard play ----------
+  document.addEventListener("keydown", (ev) => {
+    if ($("play").hidden || !game || game.done || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    const tag = (ev.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "select" || tag === "textarea") return;
+    const q = game.qs[game.i];
+    if (!game.answered && /^[1-9]$/.test(ev.key) && q.options.length) {
+      const opt = q.options[Number(ev.key) - 1];
+      if (opt) { ev.preventDefault(); answer(opt); }
+    } else if (game.answered && ev.key === "Enter" && tag !== "button") {
+      ev.preventDefault();
+      next();
+    }
+  });
+
+  // ---------- Boot ----------
+  function renderAll() {
+    renderSettings();
+    renderPlay(false);
+    if (!$("codebook").hidden) renderBook();
+  }
+
+  function start(data) {
+    const saved = data && data.game;
+    if (saved && Array.isArray(saved.qs) && saved.qs.length && saved.qs.every((q) => byCode.has(q.c))) game = saved;
+    else newGame();
+    renderAll();
+    const hash = (location.hash || "").replace("#", "");
+    showTab(TABS.includes(hash) ? hash : "play");
+  }
+
+  try { window.claude?.hot?.snapshot?.(() => ({ game })); } catch (e) { /* not in an artifact viewer */ }
+  if (window.claude?.hot?.ready) window.claude.hot.ready(start);
+  else start(window.claude?.hot?.data ?? {});
+})();
+</script>
